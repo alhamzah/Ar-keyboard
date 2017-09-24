@@ -1,3 +1,4 @@
+var p_length = 0;
 $(function(){
     var $write = $('#write'),
         shift = false,
@@ -8,26 +9,31 @@ $(function(){
                              'a': 'ش', 's':'س', 'd':'ي', 'f':'ب', 'g':'ل', 'h':'ا', 'j':'ت', 'k':'ن', 'l':'م', ';':'ك', "'":'ط',
                                  'z':'ئ', 'x':'ء', 'c':'ؤ', 'v':'ر', 'b':'لا', 'n':'ى', 'm':'ة', ',':'و', '.':'ز', '/':'ظ'}
 
-  $($write).bind('input propertychange', function() {
+  $($write).bind('keyup', function() {
 
         var input = $write.val(),
-            toEN = $('#checkbox').is(':checked'),
+            abs_length = input.length - p_length
+
+        if (abs_length > 0) {
             output = '';
-        for (i = 0; i < input.length; i++) {
-            if (toEN  === true && input[i] in key_matching) 
-                {output += key_matching[input[i]]
+            for (i = 0; i < input.length; i++) {
+                key = input[i].toLowerCase()
+                if (key in key_matching) {
+                    output += key_matching[key]
+                }
+                else {
+                    output += input[i]
+                }
             }
-            else {
-                output += input[i]
-            }
+            $write.val(output);
         }
-        $write.val(output);
+        p_length = $write.val().length;
 })
     $('#keyboard li').click(function(){
         var $this = $(this);
         if (!($this.hasClass('capslock') || $this.hasClass('delete')))
             character = $this.text()[0]; // If it's a lowercase letter, nothing happens to this variable
-        console.log(character)
+
         // Shift keys
         if ($this.hasClass('left-shift') || $this.hasClass('right-shift')) {
             $('.number').toggleClass('uppercase');
@@ -43,7 +49,7 @@ $(function(){
         if ($this.hasClass('capslock')) {
             $('.number').toggleClass('uppercase');
             $('.letter').toggleClass('uppercase');
-            capslock = true;
+            capslock = (capslock === true) ? false : true;
             return false
         }
          
@@ -61,7 +67,7 @@ $(function(){
         if ($this.hasClass('return')) character = "\n";
          
         // Uppercase letter
-        if (!$this.hasClass('uppercase') && character in key_matching) {character = key_matching[character]}
+        if (!capslock && character in key_matching) {character = key_matching[character]}
         else if ($this.hasClass('uppercase') && shift == true) {character = character.toUpperCase()}
         
         // Remove shift once a key is clicked.
@@ -73,6 +79,7 @@ $(function(){
         }
         // Add the character
         $write.html($write.text() + character);
+        p_length = $write.val().length;
     });
 });
 
